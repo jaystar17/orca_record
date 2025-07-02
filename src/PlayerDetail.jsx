@@ -10,7 +10,10 @@ function PlayerDetail() {
   const hitter = hitters[name]?.hitter || {};
   const pitcher = pitchers[name]?.pitcher || {};
 
-  const WAR = ((parseFloat(hitter?.career?.WAR || 0) + parseFloat(pitcher?.career?.WAR || 0)) || 0).toFixed(2);
+  const WAR = (
+    (parseFloat(hitter?.career?.WAR || 0) + parseFloat(pitcher?.career?.WAR || 0)) ||
+    0
+  ).toFixed(2);
 
   const format = (v, digits = 2, forceFloat = false) => {
     if (v === undefined || v === null || v === "") return "-";
@@ -66,8 +69,7 @@ function PlayerDetail() {
     { key: "WAR", label: "WAR", digits: 2, float: true },
   ];
 
-  const columnStyle = "w-[1%]";
-
+  const columnStyle = `w-[5.88%]`;
 
   return (
     <div className="p-4 max-w-[1600px] mx-auto">
@@ -82,8 +84,46 @@ function PlayerDetail() {
         {name} 선수 상세 기록
       </h2>
 
-      <div className="text-lg text-center mb-6 font-semibold">통합 WAR: {WAR}</div>
+      {/* 요약 카드 */}
+      <div className="grid grid-cols-1 sm:grid-cols-3 gap-4 mb-6 text-center">
+        <div className="border rounded-xl p-4 shadow bg-white">
+          <div className="text-sm text-gray-500">이름</div>
+          <div className="text-lg font-semibold">{profile?.이름 || "-"}</div>
+        </div>
+        <div className="border rounded-xl p-4 shadow bg-white">
+          <div className="text-sm text-gray-500">등번호</div>
+          <div className="text-lg font-semibold">{profile?.등번호 || "-"}</div>
+        </div>
+        <div className="border rounded-xl p-4 shadow bg-white">
+          <div className="text-sm text-gray-500">포지션</div>
+          <div className="text-lg font-semibold">{profile?.포지션 || "-"}</div>
+        </div>
 
+        <div className="border rounded-xl p-4 shadow bg-white">
+          <div className="text-sm text-gray-500">통합 WAR</div>
+          <div className="text-lg font-bold text-blue-600">{WAR}</div>
+        </div>
+
+        {hitter?.career?.출루율 && hitter?.career?.장타율 && (
+          <div className="border rounded-xl p-4 shadow bg-white">
+            <div className="text-sm text-gray-500">누적 OPS</div>
+            <div className="text-lg font-bold text-green-600">
+              {(parseFloat(hitter.career.출루율) + parseFloat(hitter.career.장타율)).toFixed(3)}
+            </div>
+          </div>
+        )}
+
+        {pitcher?.career?.ERA && (
+          <div className="border rounded-xl p-4 shadow bg-white">
+            <div className="text-sm text-gray-500">누적 ERA</div>
+            <div className="text-lg font-bold text-red-600">
+              {parseFloat(pitcher.career.ERA).toFixed(2)}
+            </div>
+          </div>
+        )}
+      </div>
+
+      {/* 타자 테이블 */}
       {Object.keys(hitter).length > 0 && (
         <div className="mb-6 overflow-x-auto">
           <table className="min-w-[1600px] w-full table-fixed border border-collapse text-sm text-center whitespace-nowrap">
@@ -126,6 +166,7 @@ function PlayerDetail() {
         </div>
       )}
 
+      {/* 투수 테이블 */}
       {Object.keys(pitcher).length > 0 && (
         <div className="overflow-x-auto">
           <table className="min-w-[1600px] w-full table-fixed border border-collapse text-sm text-center whitespace-nowrap">
