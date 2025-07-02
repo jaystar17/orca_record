@@ -10,10 +10,7 @@ function PlayerDetail() {
   const hitter = hitters[name]?.hitter || {};
   const pitcher = pitchers[name]?.pitcher || {};
 
-  const WAR = (
-    (parseFloat(hitter?.career?.WAR || 0) + parseFloat(pitcher?.career?.WAR || 0)) ||
-    0
-  ).toFixed(2);
+  const WAR = ((parseFloat(hitter?.career?.WAR || 0) + parseFloat(pitcher?.career?.WAR || 0)) || 0).toFixed(2);
 
   const format = (v, digits = 2, forceFloat = false) => {
     if (v === undefined || v === null || v === "") return "-";
@@ -69,10 +66,10 @@ function PlayerDetail() {
     { key: "WAR", label: "WAR", digits: 2, float: true },
   ];
 
-  const columnStyle = `w-[5.88%]`;
+  const columnStyle = "w-[6%] px-2 py-1 border";
 
   return (
-    <div className="p-4 max-w-[1600px] mx-auto">
+    <div className="p-6 max-w-[1600px] mx-auto bg-white shadow-lg rounded-xl">
       <button
         onClick={() => navigate("/")}
         className="text-blue-600 hover:underline text-sm mb-4"
@@ -80,54 +77,22 @@ function PlayerDetail() {
         ← 메인으로 돌아가기
       </button>
 
-      <h2 className="text-2xl font-bold text-center mb-4 text-gray-800">
-        {name} 선수 상세 기록
-      </h2>
-
-      {/* 요약 카드 */}
-      <div className="grid grid-cols-1 sm:grid-cols-3 gap-4 mb-6 text-center">
-        <div className="border rounded-xl p-4 shadow bg-white">
-          <div className="text-sm text-gray-500">이름</div>
-          <div className="text-lg font-semibold">{profile?.이름 || "-"}</div>
+      <div className="bg-gradient-to-r from-blue-200 to-indigo-200 p-4 rounded-md mb-6">
+        <h2 className="text-3xl font-bold text-center text-gray-800 mb-2">
+          {name} 선수 상세 기록
+        </h2>
+        <div className="flex justify-center gap-8 text-lg font-medium text-gray-700">
+          <div>등번호: {profile?.등번호}</div>
+          <div>포지션: {profile?.포지션}</div>
+          <div className="font-semibold">통합 WAR: {WAR}</div>
         </div>
-        <div className="border rounded-xl p-4 shadow bg-white">
-          <div className="text-sm text-gray-500">등번호</div>
-          <div className="text-lg font-semibold">{profile?.등번호 || "-"}</div>
-        </div>
-        <div className="border rounded-xl p-4 shadow bg-white">
-          <div className="text-sm text-gray-500">포지션</div>
-          <div className="text-lg font-semibold">{profile?.포지션 || "-"}</div>
-        </div>
-
-        <div className="border rounded-xl p-4 shadow bg-white">
-          <div className="text-sm text-gray-500">통합 WAR</div>
-          <div className="text-lg font-bold text-blue-600">{WAR}</div>
-        </div>
-
-        {hitter?.career?.출루율 && hitter?.career?.장타율 && (
-          <div className="border rounded-xl p-4 shadow bg-white">
-            <div className="text-sm text-gray-500">누적 OPS</div>
-            <div className="text-lg font-bold text-green-600">
-              {(parseFloat(hitter.career.출루율) + parseFloat(hitter.career.장타율)).toFixed(3)}
-            </div>
-          </div>
-        )}
-
-        {pitcher?.career?.ERA && (
-          <div className="border rounded-xl p-4 shadow bg-white">
-            <div className="text-sm text-gray-500">누적 ERA</div>
-            <div className="text-lg font-bold text-red-600">
-              {parseFloat(pitcher.career.ERA).toFixed(2)}
-            </div>
-          </div>
-        )}
       </div>
 
-      {/* 타자 테이블 */}
       {Object.keys(hitter).length > 0 && (
-        <div className="mb-6 overflow-x-auto">
-          <table className="min-w-[1600px] w-full table-fixed border border-collapse text-sm text-center whitespace-nowrap">
-            <thead className="bg-gray-100 font-semibold">
+        <div className="mb-8 overflow-x-auto">
+          <h3 className="text-xl font-semibold mb-2">🧢 타자 기록</h3>
+          <table className="min-w-[1600px] w-full border-collapse text-sm text-center whitespace-nowrap overflow-x-auto">
+            <thead className="bg-gray-100">
               <tr>
                 <th className={columnStyle}>시즌</th>
                 {hitterFields.map((f) => (
@@ -139,7 +104,7 @@ function PlayerDetail() {
               {seasons.map((season, i) => {
                 const row = hitter[season] || {};
                 return (
-                  <tr key={season} className={i === 0 ? "border-b border-gray-300" : ""}>
+                  <tr key={season} className={i === 0 ? "border-t-2 border-gray-300" : ""}>
                     <td className={columnStyle}>{season === "career" ? "누적" : season + "시즌"}</td>
                     {hitterFields.map((f) => {
                       const val = row[f.key];
@@ -166,11 +131,11 @@ function PlayerDetail() {
         </div>
       )}
 
-      {/* 투수 테이블 */}
       {Object.keys(pitcher).length > 0 && (
         <div className="overflow-x-auto">
-          <table className="min-w-[1600px] w-full table-fixed border border-collapse text-sm text-center whitespace-nowrap">
-            <thead className="bg-blue-100 font-semibold">
+          <h3 className="text-xl font-semibold mb-2">⚾ 투수 기록</h3>
+          <table className="min-w-[1600px] w-full border-collapse text-sm text-center whitespace-nowrap overflow-x-auto">
+            <thead className="bg-blue-100">
               <tr>
                 <th className={columnStyle}>시즌</th>
                 {pitcherFields.map((f) => (
@@ -182,7 +147,7 @@ function PlayerDetail() {
               {seasons.map((season, i) => {
                 const row = pitcher[season] || {};
                 return (
-                  <tr key={season} className={i === 0 ? "border-b border-gray-300" : ""}>
+                  <tr key={season} className={i === 0 ? "border-t-2 border-blue-300" : ""}>
                     <td className={columnStyle}>{season === "career" ? "누적" : season + "시즌"}</td>
                     {pitcherFields.map((f) => {
                       const val = row[f.key];
