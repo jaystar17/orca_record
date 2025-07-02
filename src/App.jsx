@@ -1,14 +1,15 @@
+import { useState } from "react";
 import { useNavigate } from "react-router-dom";
+import profiles from "./data/players_profile.json";
 import hitters from "./data/players_hitter.json";
 import pitchers from "./data/players_pitcher.json";
-import profiles from "./data/players_profile.json";
 
 function App() {
+  const [filter, setFilter] = useState("전체");
   const navigate = useNavigate();
 
   const format = (v, digits = 2, forceFloat = false) => {
     if (v === undefined || v === null || v === "") return "-";
-    if (isNaN(v)) return "-";
     return forceFloat ? Number(v).toFixed(digits) : parseInt(v);
   };
 
@@ -20,88 +21,86 @@ function App() {
     return `${whole}${fraction ? ` ${fraction}` : ""}`;
   };
 
-  const players = profiles.map((profile) => {
-    const name = profile.이름;
-    const hitter = hitters[name]?.hitter?.career || {};
-    const pitcher = pitchers[name]?.pitcher?.career || {};
-    const war = (parseFloat(hitter?.WAR || 0) + parseFloat(pitcher?.WAR || 0)).toFixed(2);
-    const avg = hitter?.타율 ? Number(hitter.타율).toFixed(3) : "-";
-    const ops =
-      hitter?.출루율 && hitter?.장타율
-        ? (parseFloat(hitter.출루율) + parseFloat(hitter.장타율)).toFixed(3)
-        : "-";
-    const whip = pitcher?.WHIP ? Number(pitcher.WHIP).toFixed(2) : "-";
-
-    return {
-      name,
-      number: profile.등번호,
-      position: profile.포지션,
-      war,
-      avg,
-      ops,
-      hr: hitter.홈런 || 0,
-      rbi: hitter.타점 || 0,
-      ip: pitcher.이닝 ? formatInning(pitcher.이닝) : "-",
-      so: pitcher.삼진 || "-",
-      era: pitcher.ERA ? Number(pitcher.ERA).toFixed(2) : "-",
-      whip,
-    };
+  const filteredProfiles = profiles.filter((p) => {
+    if (filter === "전체") return true;
+    if (filter === "타자") return hitters[p.이름];
+    if (filter === "투수") return pitchers[p.이름];
   });
 
-  const headers = [
-    "이름",
-    "등번호",
-    "포지션",
-    "WAR",
-    "타율",
-    "OPS",
-    "홈런",
-    "타점",
-    "이닝",
-    "삼진",
-    "ERA",
-    "WHIP",
-  ];
+  const columnStyle =
+    "px-4 py-3 border border-tableLine text-sm text-center font-mono";
 
   return (
-    <div className="p-4 max-w-[1600px] mx-auto">
-      <h2 className="text-2xl font-bold text-center mb-6 text-gray-100">ORCA 선수 기록 요약</h2>
+    <div className="p-4 max-w-[1800px] mx-auto bg-background text-foreground font-sans">
+      <h1 className="text-3xl font-bold text-center mb-6 text-primary tracking-tight">
+        ORCA 선수 기록 요약
+      </h1>
 
-      <div className="overflow-x-auto">
-        <table className="min-w-[1600px] w-full table-fixed border border-collapse text-sm text-center whitespace-nowrap">
-          <thead className="bg-gray-800 text-white font-semibold">
+      <div className="flex justify-center space-x-4 mb-6">
+        {["전체", "타자", "투수"].map((t) => (
+          <button
+            key={t}
+            onClick={() => setFilter(t)}
+            className={`px-4 py-2 rounded transition ${
+              filter === t
+                ? "bg-primary text-black font-bold shadow"
+                : "bg-zinc-800 text-white hover:bg-zinc-700"
+            }`}
+          >
+            {t}
+          </button>
+        ))}
+      </div>
+
+      <div className="overflow-x-auto shadow-md rounded-lg">
+        <table className="min-w-[1600px] w-full table-fixed border border-tableLine text-sm text-center whitespace-nowrap">
+          <thead className="bg-zinc-900 text-mint-400 font-semibold border-b border-tableLine sticky top-0 z-10">
             <tr>
-              {headers.map((header, i) => (
-                <th
-                  key={i}
-                  className="px-3 py-2 border-r border-gray-700 w-[8.3%]"
-                >
-                  {header}
-                </th>
-              ))}
+              <th className={columnStyle}>이름</th>
+              <th className={columnStyle}>등번호</th>
+              <th className={columnStyle}>포지션</th>
+              <th className={columnStyle}>WAR</th>
+              <th className={columnStyle}>타율</th>
+              <th className={columnStyle}>OPS</th>
+              <th className={columnStyle}>홈런</th>
+              <th className={columnStyle}>타점</th>
+              <th className={columnStyle}>득점</th>
+              <th className={columnStyle}>이닝</th>
+              <th className={columnStyle}>삼진</th>
+              <th className={columnStyle}>ERA</th>
+              <th className={columnStyle}>WHIP</th>
             </tr>
           </thead>
           <tbody>
-            {players.map((player) => (
-              <tr
-                key={player.name}
-                className="cursor-pointer hover:bg-gray-200"
-                onClick={() => navigate(`/player/${player.name}`)}
-              >
-                <td className="px-3 py-2 border-r border-gray-200">{player.name}</td>
-                <td className="px-3 py-2 border-r border-gray-200">{player.number}</td>
-                <td className="px-3 py-2 border-r border-gray-200">{player.position}</td>
-                <td className="px-3 py-2 border-r border-gray-200">{player.war}</td>
-                <td className="px-3 py-2 border-r border-gray-200">{player.avg}</td>
-                <td className="px-3 py-2 border-r border-gray-200">{player.ops}</td>
-                <td className="px-3 py-2 border-r border-gray-200">{player.hr}</td>
-                <td className="px-3 py-2 border-r border-gray-200">{player.rbi}</td>
-                <td className="px-3 py-2 border-r border-gray-200">{player.ip}</td>
-                <td className="px-3 py-2 border-r border-gray-200">{player.so}</td>
-                <td className="px-3 py-2 border-r border-gray-200">{player.era}</td>
-                <td className="px-3 py-2 border-r border-gray-200">{player.whip}</td>
-              </tr>
-            ))}
+            {filteredProfiles.map((p) => {
+              const hitter = hitters[p.이름]?.hitter?.career || {};
+              const pitcher = pitchers[p.이름]?.pitcher?.career || {};
+              const WAR = (
+                parseFloat(hitter.WAR || 0) + parseFloat(pitcher.WAR || 0)
+              ).toFixed(2);
+
+              return (
+                <tr
+                  key={p.이름}
+                  onClick={() => navigate(`/player/${p.이름}`)}
+                  className="border-b border-tableLine hover:bg-zinc-800 transition cursor-pointer"
+                >
+                  <td className={columnStyle}>{p.이름}</td>
+                  <td className={columnStyle}>{p.등번호}</td>
+                  <td className={columnStyle}>{p.포지션}</td>
+                  <td className={columnStyle}>{format(WAR, 2, true)}</td>
+                  <td className={columnStyle}>{format(hitter.타율, 3, true)}</td>
+                  <td className={columnStyle}>{format(hitter.OPS, 3, true)}</td>
+                  <td className={columnStyle}>{format(hitter.홈런)}</td>
+                  <td className={columnStyle}>{format(hitter.타점)}</td>
+                  <td className={columnStyle}>{format(hitter.득점)}</td>
+                  <td className={columnStyle}>{formatInning(pitcher.이닝)}</td>
+                  <td className={columnStyle}>{format(pitcher.삼진)}</td>
+                  <td className={columnStyle}>{format(pitcher.ERA, 2, true)}</td>
+                  <td className={columnStyle}>{format(pitcher.WHIP, 2, true)}</td>
+                </tr>
+              );
+            })}
           </tbody>
         </table>
       </div>
